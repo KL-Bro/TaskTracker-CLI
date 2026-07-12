@@ -2,5 +2,4 @@
 - can add task
 - can view task
 - can edit task
-
-# Its written in python
+- a seperate json file to save the task
