@@ -2,6 +2,8 @@ import json
 
 FILE_NAME = "tasks.json"
 
+VALID_STATUSES = ["todo", "in-progress", "done"]
+
 
 def load_tasks():
     try:
@@ -16,67 +18,139 @@ def save_tasks(tasks):
         json.dump(tasks, file, indent=4)
 
 
-def show_tasks(tasks):
-    if not tasks:
-        print("\nNo tasks.")
-    else:
-        print("\n--- To-Do List ---")
-        for i, task in enumerate(tasks, start=1):
-            print(f"{i}. {task}")
+def display_task_list(task_list, title="Tasks"):
+    if not task_list:
+        print(f"\nNo tasks found for: {title}")
+        return
+
+    print(f"\n--- {title} ---")
+    for original_index, task in task_list:
+        status_label = task["status"].upper()
+        print(f"{original_index}. [{status_label}] {task['description']}")
+
+
+def filter_tasks(tasks, status_filter=None):
+    """Returns a list of tuples: (original_1_based_index, task_dict)"""
+    filtered = []
+    for i, task in enumerate(tasks, start=1):
+        if status_filter is None or task["status"] == status_filter:
+            filtered.append((i, task))
+    return filtered
 
 
 def show_menu():
-    print("\n--- To-Do List ---")
+    print("\n--- Task Tracker ---")
     print("1. Add Task")
-    print("2. View Tasks")
-    print("3. Remove Task")
-    print("4. Exit")
+    print("2. Update Task Description")
+    print("3. Delete Task")
+    print("4. Change Task Status (In Progress / Done)")
+    print("5. List All Tasks")
+    print("6. List Done Tasks")
+    print("7. List Not Done Tasks")
+    print("8. List In Progress Tasks")
+    print("9. Exit")
 
 
 tasks = load_tasks()
 
 while True:
     show_menu()
-    choice = input("Choose an option: ")
+    choice = input("Choose an option (1-9): ").strip()
 
-    # Add Task
+    # 1. Add Task
     if choice == "1":
-        task = input("Enter a task: ").strip()
-
-        if task:
-            tasks.append(task)
+        desc = input("Enter task description: ").strip()
+        if desc:
+            tasks.append({"description": desc, "status": "todo"})
             save_tasks(tasks)
-            print("Task added!")
+            print("Task added successfully!")
         else:
-            print("Task can't be empty.")
+            print("Task description cannot be empty.")
 
-    # View Tasks
+    # 2. Update Task Description
     elif choice == "2":
-        show_tasks(tasks)
-
-    # Remove Task
-    elif choice == "3":
-        show_tasks(tasks)
-
+        all_tasks = filter_tasks(tasks)
+        display_task_list(all_tasks, "All Tasks")
         if tasks:
             try:
-                num = int(input("Task number to remove: "))
+                num = int(input("\nEnter task number to update: "))
+                if 1 <= num <= len(tasks):
+                    new_desc = input("Enter new description: ").strip()
+                    if new_desc:
+                        tasks[num - 1]["description"] = new_desc
+                        save_tasks(tasks)
+                        print("Task updated!")
+                    else:
+                        print("Description cannot be empty.")
+                else:
+                    print("Invalid task number.")
+            except ValueError:
+                print("Please enter a valid number.")
 
+    # 3. Delete Task
+    elif choice == "3":
+        all_tasks = filter_tasks(tasks)
+        display_task_list(all_tasks, "All Tasks")
+        if tasks:
+            try:
+                num = int(input("\nEnter task number to delete: "))
                 if 1 <= num <= len(tasks):
                     removed = tasks.pop(num - 1)
                     save_tasks(tasks)
-                    print(f"Removed: {removed}")
+                    print(f"Deleted: {removed['description']}")
                 else:
                     print("Invalid task number.")
-
             except ValueError:
-                print("Please enter a number.")
+                print("Please enter a valid number.")
 
-    # Exit
+    # 4. Change Task Status
     elif choice == "4":
+        all_tasks = filter_tasks(tasks)
+        display_task_list(all_tasks, "All Tasks")
+        if tasks:
+            try:
+                num = int(input("\nEnter task number to mark status: "))
+                if 1 <= num <= len(tasks):
+                    print("Choose status: 1) todo  2) in-progress  3) done")
+                    status_choice = input("Select status (1-3): ").strip()
+                    status_map = {"1": "todo", "2": "in-progress", "3": "done"}
+
+                    if status_choice in status_map:
+                        tasks[num - 1]["status"] = status_map[status_choice]
+                        save_tasks(tasks)
+                        print(f"Status updated to '{status_map[status_choice]}'!")
+                    else:
+                        print("Invalid status option.")
+                else:
+                    print("Invalid task number.")
+            except ValueError:
+                print("Please enter a valid number.")
+
+    # 5. List All Tasks
+    elif choice == "5":
+        display_task_list(filter_tasks(tasks), "All Tasks")
+
+    # 6. List Done Tasks
+    elif choice == "6":
+        display_task_list(filter_tasks(tasks, "done"), "Done Tasks")
+
+    # 7. List Not Done Tasks (todo + in-progress)
+    elif choice == "7":
+        not_done = [
+            (i, t)
+            for i, t in enumerate(tasks, start=1)
+            if t["status"] != "done"
+        ]
+        display_task_list(not_done, "Not Done Tasks")
+
+    # 8. List In Progress Tasks
+    elif choice == "8":
+        display_task_list(filter_tasks(tasks, "in-progress"), "In Progress Tasks")
+
+    # 9. Exit
+    elif choice == "9":
         print("Goodbye!")
         break
 
-    # Invalid Choice
     else:
-        print("Invalid option.")
+        print("Invalid option. Please choose between 1 and 9.")
