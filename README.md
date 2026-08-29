@@ -18,3 +18,6 @@ A lightweight, interactive Python command-line interface (CLI) to manage tasks a
   - View tasks currently `in-progress`
 - **Persistent Data:** Automatically saves tasks to a local `tasks.json` file.
 
+## Language Used
+
+- Python
