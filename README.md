@@ -2,6 +2,9 @@
 
 A lightweight, interactive Python command-line interface (CLI) to manage tasks and track their progress using a JSON file.
 
+- **Project URL** https://roadmap.sh/projects/task-tracker
+- **Repository** https://github.com/KL-Bro/TaskTracker-CLI
+ 
 ## Features
 
 - **Add Tasks:** Create new tasks with default `todo` status.
@@ -15,4 +18,3 @@ A lightweight, interactive Python command-line interface (CLI) to manage tasks a
   - View tasks currently `in-progress`
 - **Persistent Data:** Automatically saves tasks to a local `tasks.json` file.
 
-https://roadmap.sh/projects/task-tracker
